@@ -1,0 +1,134 @@
+{
+  "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
+  "version": 1,
+  "newProjectRoot": "",
+  "projects": {
+    "link-extended": {
+      "root": "apps/link-extended/",
+      "sourceRoot": "apps/link-extended/src",
+      "projectType": "application",
+      "prefix": "link-extended",
+      "schematics": {},
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/build-angular:browser",
+          "options": {
+            "outputPath": "dist/apps/link-extended",
+            "index": "apps/link-extended/src/index.html",
+            "main": "apps/link-extended/src/main.ts",
+            "polyfills": "apps/link-extended/src/polyfills.ts",
+            "tsConfig": "apps/link-extended/tsconfig.app.json",
+            "assets": [
+              "apps/link-extended/src/favicon.ico",
+              "apps/link-extended/src/assets"
+            ],
+            "styles": ["apps/link-extended/src/styles.css"],
+            "scripts": [],
+            "es5BrowserSupport": true
+          },
+          "configurations": {
+            "production": {
+              "fileReplacements": [
+                {
+                  "replace": "apps/link-extended/src/environments/environment.ts",
+                  "with": "apps/link-extended/src/environments/environment.prod.ts"
+                }
+              ],
+              "optimization": true,
+              "outputHashing": "all",
+              "sourceMap": false,
+              "extractCss": true,
+              "namedChunks": false,
+              "aot": true,
+              "extractLicenses": true,
+              "vendorChunk": false,
+              "buildOptimizer": true,
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "2mb",
+                  "maximumError": "5mb"
+                }
+              ]
+            }
+          }
+        },
+        "serve": {
+          "builder": "@angular-devkit/build-angular:dev-server",
+          "options": {
+            "browserTarget": "link-extended:build"
+          },
+          "configurations": {
+            "production": {
+              "browserTarget": "link-extended:build:production"
+            }
+          }
+        },
+        "extract-i18n": {
+          "builder": "@angular-devkit/build-angular:extract-i18n",
+          "options": {
+            "browserTarget": "link-extended:build"
+          }
+        },
+        "lint": {
+          "builder": "@angular-devkit/build-angular:tslint",
+          "options": {
+            "tsConfig": [
+              "apps/link-extended/tsconfig.app.json",
+              "apps/link-extended/tsconfig.spec.json"
+            ],
+            "exclude": ["**/node_modules/**"]
+          }
+        },
+        "test": {
+          "builder": "@nrwl/builders:jest",
+          "options": {
+            "jestConfig": "apps/link-extended/jest.config.js",
+            "tsConfig": "apps/link-extended/tsconfig.spec.json",
+            "setupFile": "apps/link-extended/src/test-setup.ts"
+          }
+        }
+      }
+    },
+    "link-extended-e2e": {
+      "root": "apps/link-extended-e2e",
+      "projectType": "application",
+      "prefix": "",
+      "architect": {
+        "e2e": {
+          "builder": "@nrwl/builders:cypress",
+          "options": {
+            "cypressConfig": "apps/link-extended-e2e/cypress.json",
+            "tsConfig": "apps/link-extended-e2e/tsconfig.e2e.json",
+            "devServerTarget": "link-extended:serve"
+          },
+          "configurations": {
+            "production": {
+              "devServerTarget": "link-extended:serve:production"
+            }
+          }
+        },
+        "lint": {
+          "builder": "@angular-devkit/build-angular:tslint",
+          "options": {
+            "tsConfig": "apps/link-extended-e2e/tsconfig.e2e.json",
+            "exclude": ["**/node_modules/**"]
+          }
+        }
+      }
+    }
+  },
+  "cli": {
+    "warnings": {
+      "typescriptMismatch": false,
+      "versionMismatch": false
+    },
+    "defaultCollection": "@nrwl/schematics"
+  },
+  "schematics": {
+    "@nrwl/schematics:application": {
+      "framework": "angular"
+    }
+  },
+  "defaultProject": "link-extended"
+}

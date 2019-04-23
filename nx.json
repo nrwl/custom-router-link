@@ -1,0 +1,18 @@
+{
+  "npmScope": "link-extended",
+  "implicitDependencies": {
+    "angular.json": "*",
+    "package.json": "*",
+    "tsconfig.json": "*",
+    "tslint.json": "*",
+    "nx.json": "*"
+  },
+  "projects": {
+    "link-extended": {
+      "tags": []
+    },
+    "link-extended-e2e": {
+      "tags": []
+    }
+  }
+}
