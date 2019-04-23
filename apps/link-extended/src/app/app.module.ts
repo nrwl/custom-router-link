@@ -56,6 +56,48 @@ class LocalLinkService {
   }
 }
 
+export class WrappedLocationStrategy implements LocationStrategy {
+  constructor(private loc: LocationStrategy, private localLinkService: LocalLinkService) {
+  }
+
+  path(includeHash?: boolean): string {
+    return this.loc.path(includeHash);
+  }
+
+  prepareExternalUrl(internal: string): string {
+    if (this.localLinkService.isLocalLink([internal])) {
+      return this.loc.prepareExternalUrl(internal);
+    } else {
+      return internal;
+    }
+  }
+
+  pushState(state: any, title: string, url: string, queryParams: string): void {
+    return this.loc.pushState(state, title, url, queryParams);
+  }
+
+  replaceState(state: any, title: string, url: string, queryParams: string): void {
+    return this.loc.replaceState(state, title, url, queryParams);
+  }
+
+  forward(): void {
+    return this.loc.forward();
+  }
+
+  back(): void {
+    return this.loc.back();
+  }
+
+  onPopState(fn: any): void {
+    return this.loc.onPopState(fn);
+  }
+
+  getBaseHref(): string {
+    return this.loc.getBaseHref();
+  }
+}
+
+
 @Directive({ selector: 'a[c1RouterLink]' })
 export class ExtendedRouterLinkDirective extends RouterLinkWithHref {
   constructor(
@@ -64,7 +106,7 @@ export class ExtendedRouterLinkDirective extends RouterLinkWithHref {
     locationStrategy: LocationStrategy,
     private localLinkService: LocalLinkService
   ) {
-    super(router, route, locationStrategy);
+    super(router, route, new WrappedLocationStrategy(locationStrategy, localLinkService));
   }
 
   @Input()
