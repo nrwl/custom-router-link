@@ -4,10 +4,12 @@ import {
   HostListener,
   Injectable,
   Input,
-  NgModule
+  NgModule,
+  SimpleChanges,
+  OnChanges
 } from '@angular/core';
 import { Component } from '@angular/core';
-import { Location, LocationStrategy } from '@angular/common';
+import { LocationStrategy } from '@angular/common';
 import {
   ActivatedRoute,
   Router,
@@ -21,12 +23,18 @@ import {
     root
     <router-outlet></router-outlet>
     <br />
-    <a c1RouterLink="http://duckduckgo.com">Non Local</a><br />
+    <button (click)="changeLink()">Change Link</button><br />
+    <a [c1RouterLink]="href">Non Local</a><br />
     <a c1RouterLink="./b">Local</a>
   `
 })
 export class AppComponent {
   title = 'link-extended';
+  href = 'http://duckduckgo.com#horse';
+
+  changeLink() {
+    this.href = '/external';
+  }
 }
 
 @Component({
@@ -50,63 +58,25 @@ class LocalLinkService {
   isLocalLink(value: any[]) {
     if (value.length === 1 && value[0].indexOf('http') === 0) {
       return false;
+    } else if (value.length === 1 && value[0] === '/external') {
+      return false;
     } else {
       return true;
     }
   }
 }
 
-export class WrappedLocationStrategy implements LocationStrategy {
-  constructor(private loc: LocationStrategy, private localLinkService: LocalLinkService) {
-  }
-
-  path(includeHash?: boolean): string {
-    return this.loc.path(includeHash);
-  }
-
-  prepareExternalUrl(internal: string): string {
-    if (this.localLinkService.isLocalLink([internal])) {
-      return this.loc.prepareExternalUrl(internal);
-    } else {
-      return internal;
-    }
-  }
-
-  pushState(state: any, title: string, url: string, queryParams: string): void {
-    return this.loc.pushState(state, title, url, queryParams);
-  }
-
-  replaceState(state: any, title: string, url: string, queryParams: string): void {
-    return this.loc.replaceState(state, title, url, queryParams);
-  }
-
-  forward(): void {
-    return this.loc.forward();
-  }
-
-  back(): void {
-    return this.loc.back();
-  }
-
-  onPopState(fn: any): void {
-    return this.loc.onPopState(fn);
-  }
-
-  getBaseHref(): string {
-    return this.loc.getBaseHref();
-  }
-}
-
-
 @Directive({ selector: 'a[c1RouterLink]' })
-export class ExtendedRouterLinkDirective extends RouterLinkWithHref {
+export class ExtendedRouterLinkDirective extends RouterLinkWithHref
+  implements OnChanges {
   constructor(
     router: Router,
     route: ActivatedRoute,
     locationStrategy: LocationStrategy,
     private localLinkService: LocalLinkService
   ) {
-    super(router, route, new WrappedLocationStrategy(locationStrategy, localLinkService));
+    super(router, route, locationStrategy);
+    this.patchUpdate();
   }
 
   @Input()
@@ -135,11 +105,24 @@ export class ExtendedRouterLinkDirective extends RouterLinkWithHref {
     }
 
     if (!this.localLinkService.isLocalLink((this as any).commands)) {
-      (window as any).location = (this as any).commands[0];
-      return false;
+      return true;
     }
 
     return super.onClick(button, ctrlKey, metaKey, shiftKey);
+  }
+
+  /**
+   * This patches the href updating to not parse the UrlTree
+   */
+  private patchUpdate() {
+    const originalUpdate: () => void = (this as any).updateTargetUrlAndHref;
+    (this as any).updateTargetUrlAndHref = () => {
+      if (this.localLinkService.isLocalLink((this as any).commands)) {
+        originalUpdate.bind(this)();
+      } else {
+        this.href = (this as any).commands[0];
+      }
+    };
   }
 }
 
